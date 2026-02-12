@@ -835,7 +835,7 @@ docker image prune
 docker system df
 ```
 
-### Step 7: Remove Everything (Practice Environment)
+### Step 7: Remove Everything
 
 ⚠️ **Careful:** This removes ALL unused Docker resources!
 
@@ -845,12 +845,12 @@ docker system prune -a
 
 Type `y` to confirm.
 
-### ✅ Lab 4 Complete!
+### ✅ Lab 7 Complete!
 You know how to manage Docker resources efficiently!
 
 ---
 
-## Lab 5: Debugging Exercise
+## Lab 8: Debugging Exercise
 
 ### Objective
 Learn to identify and fix common Dockerfile errors.
@@ -974,7 +974,7 @@ COPY failed: file not found in build context
 
 **Fix:** Either create the file or remove those lines if not needed.
 
-### ✅ Lab 5 Complete!
+### ✅ Lab 8 Complete!
 You can now debug Docker build errors!
 
 ---

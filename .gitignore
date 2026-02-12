@@ -1,0 +1,17 @@
+# Ignore all .terraform directories at any depth
+**/.terraform/
+
+# Terraform lock file
+**/.terraform.lock.hcl
+
+# Terraform state files (at any depth)
+**/terraform.tfstate
+**/terraform.tfstate.backup
+
+# Ignore .zip files everywhere
+**/*.zip
+*.zip
+
+# VS Code
+.vscode/
+**/.vscode/
