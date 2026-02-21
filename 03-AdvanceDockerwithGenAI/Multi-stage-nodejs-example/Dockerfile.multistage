@@ -1,0 +1,21 @@
+# ---- Build Stage ----
+# This stage installs ALL dependencies (including devDependencies like typescript)
+# and compiles TypeScript to JavaScript.
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
+
+# ---- Runtime Stage ----
+# This stage only has production dependencies and the compiled JS output.
+# No TypeScript compiler, no @types packages, no source code.
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --omit=dev
+COPY --from=builder /app/dist ./dist
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
