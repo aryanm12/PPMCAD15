@@ -88,12 +88,15 @@ sudo systemctl status ssh
 sudo apt install -y openssh-server
 sudo systemctl start ssh
 sudo systemctl enable ssh
+
+# Allow 
+sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config.d/*.conf
+sudo systemctl restart sshd
+sudo systemctl restart ssh
 ```
 
-> **Note the IP address** of this machine - you'll need it in Jenkins:
-> ```bash
-> hostname -I
-> ```
+> **Note the Public IP address**
 
 ---
 

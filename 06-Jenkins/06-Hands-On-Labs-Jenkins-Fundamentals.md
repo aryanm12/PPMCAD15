@@ -1,4 +1,4 @@
-# Session 1 - Jenkins Fundamentals
+# Session 6: Jenkins Fundamentals
 ## Credentials, First Job & Your First Pipeline
 
 ---

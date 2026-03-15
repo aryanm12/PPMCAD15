@@ -1,4 +1,4 @@
-# AWS ECS, ECR & Fargate - Hands-On Labs
+# Session 4: AWS ECS, ECR & Fargate - Hands-On Labs
 ## Practical Container Deployment on AWS
 
 ## Prerequisites

@@ -1,4 +1,4 @@
-# Session 2 - Jenkins Advanced
+# Session 6: Jenkins Advanced
 ## Full CI/CD Pipeline: Docker -> ECR -> ECS & Shared Libraries
 
 ---

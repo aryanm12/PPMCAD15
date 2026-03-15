@@ -242,7 +242,7 @@ Jenkins follows a **Controller + Agent** architecture:
 2. **Docker Host URI:**
    - Linux/macOS/Docker Desktop: `unix:///var/run/docker.sock`
    - Windows (native): `npipe://./pipe/docker_engine`
-3. Click **Test Connection** — you should see "Version: ..." confirming Jenkins can talk to Docker
+3. Click **Test Connection** - you should see "Version: ..." confirming Jenkins can talk to Docker
 4. Click **Save**
 
 **Add a Docker Agent Template:**
