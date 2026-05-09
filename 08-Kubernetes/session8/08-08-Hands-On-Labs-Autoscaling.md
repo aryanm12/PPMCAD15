@@ -110,18 +110,19 @@ spec:
         averageUtilization: 50  # Scale when average CPU > 50%
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 0
+      stabilizationWindowSeconds: 0 # No cool down. The HPA reacts immediately to increased load without waiting to see if the spike is sustained.
       policies:
-      - type: Percent
+      - type: Percent # type: Percent, value: 100, periodSeconds: 30: Can double (100%) the current pod count every 30 seconds. So 2 pods → 4 → 8 etc.
         value: 100
         periodSeconds: 30
     scaleDown:
-      stabilizationWindowSeconds: 300
+      stabilizationWindowSeconds: 300 # Waits 5 minutes of sustained low load before scaling down, preventing flapping from brief dips in traffic.
       policies:
-      - type: Percent
+      - type: Percent # Percent, value: 50, periodSeconds: 60: Can only remove half the pods per minute. So 16 → 8 → 4 → 2, stepping down gradually.
         value: 50
         periodSeconds: 60
 ```
+
 
 ### Steps:
 

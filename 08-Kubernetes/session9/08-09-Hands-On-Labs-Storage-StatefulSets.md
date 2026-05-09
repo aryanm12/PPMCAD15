@@ -216,7 +216,7 @@ metadata:
   name: mysql-storage
 provisioner: ebs.csi.aws.com
 parameters:
-  type: gp2
+  type: gp3
 reclaimPolicy: Delete
 EOF
 

@@ -1,4 +1,3 @@
-# Horizontal Pod Autoscaler for Product Catalog
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -9,12 +8,12 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: product-catalog-demo
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 5
+  maxReplicas: 30
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 50
+        averageUtilization: 75
