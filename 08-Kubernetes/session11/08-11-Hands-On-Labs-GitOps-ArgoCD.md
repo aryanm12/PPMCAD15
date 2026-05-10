@@ -109,11 +109,11 @@ In these labs, you'll set up ArgoCD, deploy applications using Git as the source
            - containerPort: 80
            resources:
              requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
-              memory: "128Mi"
-              cpu: "500m"
+               memory: "64Mi"
+               cpu: "250m"
+             limits:
+               memory: "128Mi"
+               cpu: "500m"
    ```
 
 4. **Create a Service manifest** (`manifests/service.yaml`):
@@ -146,15 +146,16 @@ In these labs, you'll set up ArgoCD, deploy applications using Git as the source
      app-version: "1.0"
      environment: "production"
    ```
+6. **Create a repo on github**
 
-6. **Commit and push to Git:**
+7. **Commit and push to Git:**
    ```bash
    git add manifests/
    git commit -m "Initial application manifests"
+   git remote add origin <above-created-git-repo>
+   git branch -M main
    git push origin main
    ```
-
-   If you created a local repo, skip the push. If using GitHub, create a repo on GitHub first and push there.
 
 ### Verification
 - Manifest files are in `manifests/` directory
@@ -261,10 +262,6 @@ In these labs, you'll set up ArgoCD, deploy applications using Git as the source
        selfHeal: true      # Revert manual changes automatically
    ```
 
-   Or use CLI:
-   ```bash
-   argocd app set nginx-app --auto-prune --self-heal
-   ```
 
 2. **Verify sync policy is enabled:**
    ```bash
