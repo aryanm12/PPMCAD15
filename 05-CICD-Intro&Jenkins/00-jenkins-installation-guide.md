@@ -52,13 +52,14 @@ docker compose -f docker-compose-Jenkins.yml logs -f jenkins"
 > **Why `--privileged`?** The DinD container needs it to run a Docker daemon inside a container. This is scoped to the DinD container only - Jenkins itself runs unprivileged.
 
 > **Why port 50000?** This is the JNLP port used for agent communication. When Jenkins agents connect back to the controller, they use this port.
-```
+
 
 ### Option B: Linux (Ubuntu/Debian - Native)
 
+```
 Run the following commands in your terminal:
 
-```bash
+bash
 # Install Java 17
 sudo apt update
 sudo apt install -y fontconfig openjdk-17-jre
