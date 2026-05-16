@@ -1,0 +1,6 @@
+vpc_name = "learning-dev-vpc"
+vpc_cidr = "10.1.0.0/16"
+pub_subnet1_cidr = "10.1.1.0/24"
+pub_subnet2_cidr = "10.1.2.0/24"
+private_subnet1_cidr = "10.1.3.0/24"
+private_subnet2_cidr = "10.1.4.0/24"
