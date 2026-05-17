@@ -390,6 +390,44 @@ Understand variable types and create a reusable variables file.
      description = "Create NAT Gateway for private subnets?"
      default     = false
    }
+
+   variable "enable_dns_hostnames" {
+     type        = bool
+     description = "Enable DNS hostnames in the VPC"
+     default     = true
+   }
+
+   variable "enable_dns_support" {
+     type        = bool
+     description = "Enable DNS support in the VPC"
+     default     = true
+   }
+
+   variable "vpc_cidr" {
+     type        = string
+     description = "CIDR block for the VPC"
+     default     = "10.0.0.0/16"
+   }
+
+   variable "availability_zones" {
+     type        = list(string)
+     description = "List of AZs to use"
+     default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+   }
+
+   variable "ami_owners" {
+     type        = list(string)
+     description = "List of AMI owner IDs to filter on"
+     default     = ["amazon"]
+   }
+
+   variable "ami_name_pattern" {
+     type        = string
+     description = "Name filter pattern for the AMI lookup"
+     default     = "al2023-ami-*-x86_64"
+   }
+
+
    ```
 
 3. **Add complex types (lists and maps):**
@@ -452,25 +490,133 @@ Understand variable types and create a reusable variables file.
    }
    ```
 
-5. **Validate the configuration:**
+5. **Create main.tf:**
+   Create `main.tf`:
+   ```hcl
+      # ----------------------------
+      # VPC
+      # ----------------------------
+      resource "aws_vpc" "main" {
+      cidr_block           = var.vpc_cidr
+      enable_dns_hostnames = var.enable_dns_hostnames
+      enable_dns_support   = var.enable_dns_support
+
+      tags = {
+         Name        = "${var.environment}-vpc"
+         Environment = var.environment
+      }
+      }
+
+      # ----------------------------
+      # Internet Gateway
+      # ----------------------------
+      resource "aws_internet_gateway" "main" {
+      vpc_id = aws_vpc.main.id
+
+      tags = {
+         Name        = "${var.environment}-igw"
+         Environment = var.environment
+      }
+      }
+
+      # ----------------------------
+      # Subnets (driven by subnet_config)
+      # ----------------------------
+      resource "aws_subnet" "this" {
+      for_each = { for s in var.subnet_config : s.name => s }
+
+      vpc_id                  = aws_vpc.main.id
+      cidr_block              = each.value.cidr
+      availability_zone       = each.value.availability_zone
+      map_public_ip_on_launch = each.value.type == "public"
+
+      tags = {
+         Name        = "${var.environment}-${each.value.name}"
+         Type        = each.value.type
+         Environment = var.environment
+      }
+      }
+
+      # ----------------------------
+      # NAT Gateway (conditional via bool var)
+      # ----------------------------
+      resource "aws_eip" "nat" {
+      count  = var.enable_nat_gateway ? 1 : 0
+      domain = "vpc"
+
+      tags = {
+         Name        = "${var.environment}-nat-eip"
+         Environment = var.environment
+      }
+      }
+
+      resource "aws_nat_gateway" "main" {
+      count = var.enable_nat_gateway ? 1 : 0
+
+      allocation_id = aws_eip.nat[0].id
+      subnet_id = [
+         for s in var.subnet_config : aws_subnet.this[s.name].id
+         if s.type == "public"
+      ][0]
+
+      tags = {
+         Name        = "${var.environment}-nat"
+         Environment = var.environment
+      }
+
+      depends_on = [aws_internet_gateway.main]
+      }
+
+      # ----------------------------
+      # AMI lookup (driven by variables)
+      # ----------------------------
+      data "aws_ami" "app" {
+      most_recent = true
+      owners      = var.ami_owners
+
+      filter {
+         name   = "name"
+         values = [var.ami_name_pattern]
+      }
+      }
+
+      # ----------------------------
+      # EC2 instances (count driven by instance_count)
+      # ----------------------------
+      resource "aws_instance" "app" {
+      count = var.instance_count
+
+      ami           = data.aws_ami.app.id
+      instance_type = var.instance_type
+
+      subnet_id = [
+         for s in var.subnet_config : aws_subnet.this[s.name].id
+         if s.type == "public"
+      ][0]
+
+      tags = {
+         Name        = "${var.environment}-app-${count.index + 1}"
+         Environment = var.environment
+      }
+      }
+   ```
+6. **Validate the configuration:**
    ```bash
+   terraform fmt
    terraform init
    terraform validate
    ```
    Output: "Success! The configuration is valid."
 
-6. **Test variable override via CLI:**
-   ```bash
-   terraform plan -var="environment=prod" -var="instance_count=3"
-   ```
-   Terraform will plan using the overridden values.
-
 7. **Create a terraform.tfvars file (for defaults):**
    ```bash
    cat > terraform.tfvars << EOF
-   aws_region           = "us-east-1" # update as per your region
-   environment          = "dev"
-   enable_nat_gateway   = false
+      aws_region         = "us-east-1" # update as per your region
+      environment        = "dev"
+      instance_count     = 1
+      instance_type      = "t3.micro"
+      enable_nat_gateway = false
+      vpc_cidr           = "10.0.0.0/16"
    EOF
    ```
 

@@ -4,6 +4,7 @@ variable "ami_id_demo" {
 
 variable "instance_type_demo" {
   type = string
+  default = "t3.medium"
 }
 
 variable "subnet_id_demo" {
