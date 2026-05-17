@@ -1,4 +1,4 @@
-# Session 1: Terraform Foundations — Hands-On Labs
+# Session 1: Terraform Foundations - Hands-On Labs
 
 ## Overview
 
@@ -233,11 +233,11 @@ Understand what Terraform stores in the state file and why it's important.
    ls -la
    ```
    You should see:
-   - `provider.tf` — provider configuration
-   - `main.tf` — your resources
-   - `.terraform/` — cached provider plugins
-   - `.terraform.lock.hcl` — provider version lock
-   - `terraform.tfstate` — your infrastructure state (only if resources exist)
+   - `provider.tf` - provider configuration
+   - `main.tf` - your resources
+   - `.terraform/` - cached provider plugins
+   - `.terraform.lock.hcl` - provider version lock
+   - `terraform.tfstate` - your infrastructure state (only if resources exist)
 
 2. **If you destroyed the instance, recreate it:**
    ```bash
@@ -258,7 +258,7 @@ Understand what Terraform stores in the state file and why it's important.
 4. **State file is sensitive!**
    - Contains resource attributes (IPs, DNS names, passwords)
    - Example: RDS database password is stored in plaintext
-   - **NEVER commit to Git** — add to `.gitignore`
+   - **NEVER commit to Git** - add to `.gitignore`
 
 5. **Create `.gitignore`:**
    ```bash
@@ -284,7 +284,7 @@ Understand what Terraform stores in the state file and why it's important.
 ### Key Learnings
 - State file is the source of truth for Terraform
 - Maps logical names (aws_instance.web) to cloud IDs
-- Sensitive data lives here — treat it securely
+- Sensitive data lives here - treat it securely
 - Always add terraform.tfstate to .gitignore
 
 ---
@@ -385,6 +385,12 @@ Understand variable types and create a reusable variables file.
      default     = 1
    }
 
+   variable "instance_type" {
+     type        = string
+     description = "Instance type for EC2 instance"
+     default     = "t3.micro"
+   }
+
    variable "enable_nat_gateway" {
      type        = bool
      description = "Create NAT Gateway for private subnets?"
@@ -407,12 +413,6 @@ Understand variable types and create a reusable variables file.
      type        = string
      description = "CIDR block for the VPC"
      default     = "10.0.0.0/16"
-   }
-
-   variable "availability_zones" {
-     type        = list(string)
-     description = "List of AZs to use"
-     default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
    }
 
    variable "ami_owners" {
@@ -611,12 +611,27 @@ Understand variable types and create a reusable variables file.
 7. **Create a terraform.tfvars file (for defaults):**
    ```bash
    cat > terraform.tfvars << EOF
-      aws_region         = "us-east-1" # update as per your region
+      aws_region         = "ap-south-1" # update as per your region
       environment        = "dev"
       instance_count     = 1
       instance_type      = "t3.micro"
       enable_nat_gateway = false
       vpc_cidr           = "10.0.0.0/16"
+      availability_zones = ["ap-south-1a", "ap-south-1b", "ap-south-1c"]
+      subnet_config = [
+         {
+            name              = "public-1a"
+            cidr              = "10.0.1.0/24"
+            availability_zone = "ap-south-1a"
+            type              = "public"
+         },
+         {
+            name              = "private-1b"
+            cidr              = "10.0.2.0/24"
+            availability_zone = "ap-south-1b"
+            type              = "private"
+         }
+      ]
    EOF
    ```
 
@@ -686,7 +701,7 @@ Query AWS to find the latest Ubuntu AMI instead of hardcoding.
 ## Lab 9: Use locals to DRY up your configuration
 
 ### Objective
-Use a `locals` block to compute values once and reference them everywhere — cleaner than repeating string interpolations.
+Use a `locals` block to compute values once and reference them everywhere - cleaner than repeating string interpolations.
 
 ### Steps
 
@@ -749,10 +764,7 @@ Use a `locals` block to compute values once and reference them everywhere — cl
 
 ### When to reach for locals vs. variables
 - **Variables** are inputs from outside the module (CLI, tfvars, env vars).
-- **Locals** are computed inside the module — composed strings, conditional expressions, merged maps. They don't accept input.
+- **Locals** are computed inside the module - composed strings, conditional expressions, merged maps. They don't accept input.
 - Use locals when the same expression repeats, or when an expression is complex enough to deserve a name.
-
-### Reference Code
-See `Session1/misc_topics/locals/` for a complete working example you can `terraform init && terraform apply`.
 
 ---
