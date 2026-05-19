@@ -170,11 +170,6 @@ Extract the VPC code into a module that can be reused across environments.
    - `private_subnet_id`: Private subnet ID
    ```
 
-### Key Learnings
-- Modules are directories with main.tf, variables.tf, outputs.tf
-- Modules are reusable: call with different inputs
-- Outputs expose values to the caller
-
 ---
 
 ## Lab 2: Create EC2 and S3 Modules
@@ -501,12 +496,6 @@ cd dev
    terraform validate
    ```
 
-### What Happened?
-- Module calls: `module "vpc" { source = "./modules/vpc" }`
-- Inputs: pass variables to modules
-- Outputs: modules return values used by root or other modules
-- Single root config orchestrates multiple modules
-
 ---
 
 ## Lab 4: Deploy to Dev with dev.tfvars
@@ -519,14 +508,14 @@ Deploy the infrastructure to dev environment.
 1. **Create `dev.tfvars`:**
    ```hcl
    environment   = "dev"
-   instance_type = "t4g.micro"
+   instance_type = "t3.micro"
    ```
 
 4g. **Plan for dev:**
    ```bash
    terraform plan -var-file=dev.tfvars
    ```
-   Review: VPC, EC2 (t4g.micro), S3 (versioning off), security group
+   Review: VPC, EC2 (t3.micro), S3 (versioning off), security group
 
 3. **Apply for dev:**
    ```bash
@@ -542,7 +531,7 @@ Deploy the infrastructure to dev environment.
 
 5. **Verify in AWS Console:**
    - VPC created
-   - EC2 instance (t4g.micro) running in public subnet
+   - EC2 instance (t3.micro) running in public subnet
    - S3 bucket created (no versioning)
 
 ---
@@ -557,7 +546,7 @@ Deploy identical infrastructure to QA with different variables.
 1. **Create `qa.tfvars`:**
    ```hcl
    environment   = "qa"
-   instance_type = "t4g.small"
+   instance_type = "t3.small"
    ```
 
 4g. **Create a new directory for QA state:**

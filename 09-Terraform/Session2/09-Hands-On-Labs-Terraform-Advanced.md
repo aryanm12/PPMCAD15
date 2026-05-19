@@ -14,7 +14,7 @@ Move your Terraform state from local to S3, with locking via DynamoDB.
 
 1. **Create S3 bucket for state (via AWS console or CLI):**
    ```bash
-   aws s3 mb s3://my-terraform-state-$(date +%s) --region us-east-1
+   aws s3 mb s3://my-terraform-state-<your-name>-001 --region <your-region>
    # Note the bucket name (must be globally unique)
    ```
 
@@ -25,8 +25,13 @@ Move your Terraform state from local to S3, with locking via DynamoDB.
      --attribute-definitions AttributeName=LockID,AttributeType=S \
      --key-schema AttributeName=LockID,KeyType=HASH \
      --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-     --region us-east-1
+     --region <your-region>
    ```
+
+   or create it via console, the steps are very straightforward:
+   - Create a table with the name terraform-lock.
+   - Use LockID as the partition key (string type).
+   
 
 3. **Create a new project directory:**
    ```bash
@@ -38,9 +43,9 @@ Move your Terraform state from local to S3, with locking via DynamoDB.
    ```hcl
    terraform {
      backend "s3" {
-       bucket         = "my-terraform-state-XXXXX"  # Your bucket name
+       bucket         = "my-terraform-state-<your-name>-001"  # Your bucket name
        key            = "dev/terraform.tfstate"
-       region         = "us-east-1"
+       region         = "<your-region>"
        encrypt        = true
        dynamodb_table = "terraform-locks"
      }
@@ -54,19 +59,19 @@ Move your Terraform state from local to S3, with locking via DynamoDB.
      required_providers {
        aws = {
          source  = "hashicorp/aws"
-         version = "~> 5.0"
+         version = "~> 6.0"
        }
      }
    }
 
    provider "aws" {
-     region = "us-east-1"
+     region = "<your-region>"
    }
 
    # main.tf
    resource "aws_instance" "web" {
-     ami           = "ami-0c55b159cbfafe1f0"
-     instance_type = "t2.micro"
+     ami           = "<ubuntu_ami_id_from_your_region>>"
+     instance_type = "t3.micro"
      tags = { Name = "remote-state-test" }
    }
    ```
@@ -80,7 +85,7 @@ Move your Terraform state from local to S3, with locking via DynamoDB.
 
 7. **Verify state is in S3:**
    ```bash
-   aws s3 ls s3://my-terraform-state-XXXXX/dev/
+   aws s3 ls s3://my-terraform-state-<your-name>-001/dev/
    # Should see terraform.tfstate
    ```
 
@@ -125,8 +130,8 @@ Create N EC2 instances dynamically using count.
    ```hcl
    resource "aws_instance" "web" {
      count         = var.instance_count
-     ami           = "ami-0c55b159cbfafe1f0"
-     instance_type = "t2.micro"
+     ami           = "<ubuntu_ami_id_from_your_region>>"
+     instance_type = "t3.micro"
 
      tags = {
        Name = "web-${count.index}"
@@ -272,9 +277,6 @@ Use for_each to create named S3 buckets (safer than count for adding/removing it
    ```bash
    terraform plan
    ```
-   Output: Plan: 1 to add (only archive bucket added, others unchanged!)
-
-   Compare to count: if you added to middle, it would shift indices.
 
 7. **Remove a bucket:**
    Update `variables.tf`:
@@ -290,8 +292,6 @@ Use for_each to create named S3 buckets (safer than count for adding/removing it
    ```bash
    terraform plan
    ```
-   Output: Plan: 1 to destroy (backups bucket only)
-   "data" and "logs" unchanged!
 
 ### Key Learnings
 - `for_each` keyed by name (safer than index)
@@ -325,8 +325,8 @@ Use conditionals to create different resources per environment.
    ```hcl
    # Conditional: different instance type per environment
    resource "aws_instance" "web" {
-     ami           = "ami-0c55b159cbfafe1f0"
-     instance_type = var.environment == "prod" ? "t2.large" : "t2.micro"
+     ami           = "<ubuntu_ami_id_from_your_region>"
+     instance_type = var.environment == "prod" ? "t3.large" : "t3.micro"
 
      tags = {
        Name = "${var.environment}-web"
@@ -362,31 +362,19 @@ Use conditionals to create different resources per environment.
    ```bash
    terraform plan -var="environment=dev"
    ```
-   Output:
-   - EC2: t2.micro
-   - No RDS (count = 0)
 
 4. **Plan for prod:**
    ```bash
    terraform plan -var="environment=prod"
    ```
-   Output:
-   - EC2: t2.large
-   - RDS created (count = 1)
 
 5. **Test the difference:**
    ```bash
    terraform apply -var="environment=dev"
    terraform output instance_type
-   # t2.micro
 
    terraform destroy -var="environment=dev" --auto-approve
    ```
-
-### Key Learnings
-- Ternary operator: `condition ? true_value : false_value`
-- Count with condition: `count = condition ? 1 : 0`
-- Conditionals let same code produce different infrastructure per environment
 
 ---
 
